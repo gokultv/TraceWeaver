@@ -4,7 +4,7 @@
 The goal of Phase 1 was to build a minimum viable product (MVP) for **TraceWeaver**, a system to visualize distributed traces from microservices. The specific objective was to demonstrate a "Red Node" visualization where a downstream service failure is clearly visible in a React-based UI graph.
 
 ## 2. System Architecture
-We implemented a containerized architecture using **Docker Compose** with the following components:
+I implemented a containerized architecture using **Docker Compose** with the following components:
 
 *   **Service A (Client)**: A Python Flask service that initiates a workflow.
 *   **Service B (Server)**: A Python Flask service that processes requests and simulates random failures (20% error rate).
@@ -38,7 +38,7 @@ We implemented a containerized architecture using **Docker Compose** with the fo
 
 ## 4. Key Challenges & Solutions (Debugging Journey)
 
-During implementation, we encountered and resolved several critical technical hurdles:
+During implementation, I encountered and resolved several critical technical hurdles:
 
 ### A. OTLP Protocol Mismatch
 *   **Issue**: Traces were not appearing in Jaeger.
@@ -54,7 +54,7 @@ During implementation, we encountered and resolved several critical technical hu
 ### C. Service B Instrumentation
 *   **Issue**: Service B traces were missing, or appeared as separate traces (broken context).
 *   **Cause**: Auto-instrumentation (`opentelemetry-instrument`) was failing silently for Service B, likely due to dependency conflicts or environment issues.
-*   **Fix**: Switched Service B to **Manual Instrumentation**. We explicitly configured the `OTLPSpanExporter` in `app.py` to ensure traces are sent to `http://jaeger:4318/v1/traces`.
+*   **Fix**: Switched Service B to **Manual Instrumentation**. I explicitly configured the `OTLPSpanExporter` in `app.py` to ensure traces are sent to `http://jaeger:4318/v1/traces`.
 
 ### D. UI Trace Selection
 *   **Issue**: The UI sometimes showed only Service A, even when Service B traces existed in Jaeger.
@@ -62,7 +62,7 @@ During implementation, we encountered and resolved several critical technical hu
 *   **Fix**: Updated `FlowMap.js` to iterate through all returned traces and select the one with the **most spans**. This ensures the UI always displays the complete distributed trace containing both services.
 
 ## 5. Final Outcome
-We successfully achieved the Phase 1 objective. The system now:
+I successfully achieved the Phase 1 objective. The system now:
 1.  Generates distributed traces across two services.
 2.  Reliably collects them in Jaeger.
 3.  Visualizes the flow in real-time.
