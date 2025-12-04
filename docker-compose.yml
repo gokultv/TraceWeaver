@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - "16686:16686" # UI
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - QUERY_HTTP_SERVER_CORS_ALLOW_ORIGINS="*"
+    networks:
+      - traceweaver-net
+
+  service-a:
+    build: ./service-a
+    container_name: service-a
+    ports:
+      - "5001:5000"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_SERVICE_NAME=service-a
+      - SERVICE_B_URL=http://service-b:5000/process
+    depends_on:
+      - jaeger
+      - service-b
+    networks:
+      - traceweaver-net
+
+  service-b:
+    build: ./service-b
+    container_name: service-b
+    ports:
+      - "5002:5000"
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_SERVICE_NAME=service-b
+      - OTEL_LOG_LEVEL=debug
+      - OTEL_TRACES_EXPORTER=console,otlp_proto_http
+    depends_on:
+      - jaeger
+    networks:
+      - traceweaver-net
+
+  traceweaver-ui:
+    build: ./traceweaver-ui
+    container_name: traceweaver-ui
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_JAEGER_API=http://localhost:16686/api
+    depends_on:
+      - jaeger
+    networks:
+      - traceweaver-net
+
+networks:
+  traceweaver-net:
+    driver: bridge
